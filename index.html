@@ -22,6 +22,7 @@
 </head>
 <body>
 
+    <!-- Меню категорій -->
     <div class="categories-menu">
         <button class="cat-btn active" onclick="filterCategory('all', this)">Всі товари</button>
         <button class="cat-btn" onclick="filterCategory('sets', this)">🔥 Готові сети</button>
@@ -34,17 +35,21 @@
         <button class="cat-btn" onclick="filterCategory('knives', this)">Ножі</button>
     </div>
 
+    <!-- Каталог -->
     <div id="catalog"></div>
 
+    <!-- Панель кошика -->
     <div id="cart-panel" class="cart-status" style="display: none;">
         <span id="cart-info">В кошику: 0 товарів</span>
         <button class="btn" style="margin-top: 10px; background: #2ecc71;" onclick="checkout()">Оформити замовлення</button>
     </div>
 
     <script>
+        // Ініціалізація Telegram WebApp
         const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tg) { tg.ready(); tg.expand(); }
 
+        // База даних товарів
         const products = [
             { id: 1, cat: 'sets', name: 'Тактичний Сет: Hatsan FlashPup + Насос + Приціл + 500 куль', price: 19400, desc: 'Повністю готовий до стрільби PCP-комплект. Економічна вигода при купівлі набором!', img: '📦 Комплект Hatsan' },
             { id: 2, cat: 'sets', name: 'Стартовий Сет: Retay XPro + 50 холостих набоїв + Олія', price: 5950, desc: 'Комплект для захисту та тренувань.', img: '📦 Комплект Retay' },
@@ -61,6 +66,7 @@
 
         let cart = [];
 
+        // Функція відображення товарів
         function renderProducts(filteredList) {
             const catalog = document.getElementById('catalog');
             catalog.innerHTML = '';
@@ -77,11 +83,15 @@
             });
         }
 
+        // Логіка фільтрації категорій
         function filterCategory(categoryName, buttonElement) {
             document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
             buttonElement.classList.add('active');
-            if (categoryName === 'all') { renderProducts(products); } 
-            else { renderProducts(products.filter(p => p.cat === categoryName)); }
+            if (categoryName === 'all') { 
+                renderProducts(products); 
+            } else { 
+                renderProducts(products.filter(p => p.cat === categoryName)); 
+            }
         }
 
         function addToCart(name, price) {
@@ -96,26 +106,29 @@
             const info = document.getElementById('cart-info');
             if (cart.length > 0) {
                 panel.style.display = 'block';
-                info.innerText = `В кошику товарів: ${cart.length} | Сума: ${cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)} грн`;
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                info.innerText = `В кошику товарів: ${cart.length} | Сума: ${total} грн`;
             } else { panel.style.display = 'none'; }
         }
 
+        // Нова кнопка «Поділитися» через пряме посилання — працює ЗАВЖДИ
         function checkout() {
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
-    let orderText = `📦 НОВЕ ЗАМОВЛЕННЯ\n`;
-    cart.forEach(item => {
-        orderText += `• ${item.name} x${item.quantity} (${item.price * item.quantity} грн)\n`;
-    });
-    orderText += `💰 РАЗОМ: ${total} грн`;
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            let orderText = `📦 НОВЕ ЗАМОВЛЕННЯ\n`;
+            cart.forEach(item => {
+                orderText += `• ${item.name} x${item.quantity} (${item.price * item.quantity} грн)\n`;
+            });
+            orderText += `💰 РАЗОМ ДО СПЛАТИ: ${total} грн`;
 
-    if (tg) {
-        // Профессиональный метод перенаправления текста: работает ВЕЗДЕ
-        // Он откроет окно выбора чата, где вы выберете этого же бота
-        tg.openTelegramLink(`https://t.me{encodeURIComponent(orderText)}`);
-        tg.close();
-    }
-}
+            if (tg) {
+                // Перенаправляємо користувача у меню вибору чату для відправки чеку
+                tg.openTelegramLink('https://t.me' + encodeURIComponent(orderText));
+                tg.close();
+            }
+        }
+
+        // Стартовий запуск каталогу
+        renderProducts(products);
+    </script>
+</body>
 </html>
-
-
