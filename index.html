@@ -3,51 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Пневматична зброя</title>
-    <!-- Официальный скрипт Telegram WebApp -->
+    <title>Магазин пневматики</title>
     <script src="https://telegram.org"></script>
     <style>
-        body { font-family: Arial, sans-serif; background-color: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); margin: 0; padding: 15px; }
+        body { font-family: Arial, sans-serif; background-color: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); margin: 0; padding: 15px; padding-bottom: 100px; }
         .product-card { border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: var(--tg-theme-secondary-bg-color, #f9f9f9); }
+        .product-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; }
         .product-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
         .product-desc { font-size: 14px; color: #666; margin-bottom: 10px; }
         .product-price { font-size: 16px; font-weight: bold; color: #2ecc71; margin-bottom: 10px; }
         .btn { background: var(--tg-theme-button-color, #3498db); color: var(--tg-theme-button-text-color, #fff); border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; }
-        .cart-status { position: fixed; bottom: 0; left: 0; right: 0; background: #333; color: #fff; padding: 15px; text-align: center; display: none; }
+        .cart-status { position: fixed; bottom: 0; left: 0; right: 0; background: #333; color: #fff; padding: 15px; text-align: center; }
     </style>
 </head>
 <body>
 
     <h2>Каталог товарів</h2>
+    <div id="catalog">Завантаження товарів...</div>
 
-    <!-- Пример карточки товара, созданной ИИ -->
-    <div class="product-card">
-        <div class="product-title">Hatsan FlashPup-S Set (4.5мм)</div>
-        <div class="product-desc">Комплект із насосом та прицілом 4x32. PCP-система, компонування Bullpup. Спортивно-розважальна стрільба (18+).</div>
-        <div class="product-price">18500 грн</div>
-        <button class="btn" onclick="addToCart('Hatsan FlashPup-S Set', 18500)">Додати в кошик</button>
-    </div>
-
-    <!-- Нижняя панель корзины -->
-    <div id="cart-panel" class="cart-status">
+    <div id="cart-panel" class="cart-status" style="display: none;">
         <span id="cart-info">В кошику: 0 товарів</span>
         <button class="btn" style="margin-top: 10px; background: #2ecc71;" onclick="checkout()">Оформити замовлення</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.ready(); // Сообщаем Telegram, что WebApp загрузился
-        tg.expand(); // Разворачиваем на весь экран
+        tg.ready();
+        tg.expand();
 
         let cart = [];
 
+        // Функция автоматической загрузки товаров из Базы Данных через API бота
+        // ВНИМАНИЕ: На бесплатном тесте на ПК используем localhost. При переносе в облако этот URL изменится.
+        async def loadProducts() {
+            try {
+                const response = await fetch('http://localhost:8080/api/products');
+                const products = await response.json();
+                const catalog = document.getElementById('catalog');
+                catalog.innerHTML = '';
+
+                products.forEach(p => {
+                    catalog.innerHTML += `
+                        <div class="product-card">
+                            <img class="product-img" src="${p.image}" alt="${p.name}">
+                            <div class="product-title">${p.name}</div>
+                            <div class="product-desc">${p.description}</div>
+                            <div class="product-price">${p.price} грн</div>
+                            <button class="btn" onclick="addToCart('${p.name}', ${p.price})">Додати в кошик</button>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                document.getElementById('catalog').innerText = 'Помилка завантаження бази даних.';
+            }
+        }
+
         function addToCart(name, price) {
             const item = cart.find(i => i.name === name);
-            if (item) {
-                item.quantity += 1;
-            } else {
-                cart.push({ name: name, price: price, quantity: 1 });
-            }
+            if (item) { item.quantity += 1; } 
+            else { cart.push({ name: name, price: price, quantity: 1 }); }
             updateCartPanel();
         }
 
@@ -58,19 +72,17 @@
                 panel.style.display = 'block';
                 const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
                 info.innerText = `В кошику товарів: ${cart.length} | Сума: ${total} грн`;
-            } else {
-                panel.style.display = 'none';
-            }
+            } else { panel.style.display = 'none'; }
         }
 
         function checkout() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const orderData = { cart: cart, total: total };
-            
-            // Отправляем данные обратно в бота и закрываем окно витрины
-            tg.sendData(JSON.stringify(orderData));
+            tg.sendData(JSON.stringify({ cart: cart, total: total }));
             tg.close();
         }
+
+        loadProducts();
     </script>
 </body>
 </html>
+
