@@ -45,11 +45,9 @@
     </div>
 
     <script>
-        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg) {
-    tg.ready();
-    tg.expand();
-}
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
 
         // Повний список товарів
         const products = [
@@ -123,14 +121,17 @@
         }
 
         function checkout() {
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            tg.sendData(JSON.stringify({ cart: cart, total: total }));
-            tg.close();
-        }
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // Формируем красивый текст накладной для отправки в чат
+    let orderText = `📦 НОВЕ ЗАМОВЛЕННЯ\n`;
+    cart.forEach(item => {
+        orderText += `• ${item.name} x${item.quantity} (${item.price * item.quantity} грн)\n`;
+    });
+    orderText += `💰 РАЗОМ: ${total} грн`;
 
-        // Запуск при завантаженні сторінки
-        renderProducts(products);
-    </script>
-</body>
-</html>
+    // Отправляем текст напрямую в чат бота от лица пользователя
+    tg.sendData(orderText);
+    tg.close();
+}
 
