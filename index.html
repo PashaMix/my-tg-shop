@@ -101,22 +101,21 @@
         }
 
         function checkout() {
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            let orderText = `📦 НОВЕ ЗАМОВЛЕННЯ\n`;
-            cart.forEach(item => {
-                orderText += `• ${item.name} x${item.quantity} (${item.price * item.quantity} грн)\n`;
-            });
-            orderText += `💰 РАЗОМ: ${total} грн`;
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    let orderText = `📦 НОВЕ ЗАМОВЛЕННЯ\n`;
+    cart.forEach(item => {
+        orderText += `• ${item.name} x${item.quantity} (${item.price * item.quantity} грн)\n`;
+    });
+    orderText += `💰 РАЗОМ: ${total} грн`;
 
-            if (tg) {
-                tg.sendData(orderText);
-                tg.close();
-            }
-        }
-
-        renderProducts(products);
-    </script>
-</body>
+    if (tg) {
+        // Профессиональный метод перенаправления текста: работает ВЕЗДЕ
+        // Он откроет окно выбора чата, где вы выберете этого же бота
+        tg.openTelegramLink(`https://t.me{encodeURIComponent(orderText)}`);
+        tg.close();
+    }
+}
 </html>
 
 
