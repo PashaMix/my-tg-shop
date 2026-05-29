@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Магазин зброї Козак</title>
+    <title>Магазин Козак</title>
     <script src="https://telegram.org"></script>
     <style>
         body { font-family: Arial, sans-serif; background-color: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); margin: 0; padding: 10px; padding-bottom: 100px; }
         .categories-menu { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; }
         .categories-menu::-webkit-scrollbar { display: none; }
-        .cat-btn { background: var(--tg-theme-secondary-bg-color, #eee); color: var(--tg-theme-text-color, #000); border: 1px solid #ccc; padding: 8px 14px; border-radius: 20px; cursor: pointer; white-space: nowrap; font-size: 14px; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
+        .cat-btn { background: var(--tg-theme-secondary-bg-color, #eee); color: var(--tg-theme-text-color, #000); border: 1px solid #ccc; padding: 8px 14px; border-radius: 20px; cursor: pointer; white-space: nowrap; font-size: 14px; }
         .cat-btn.active { background: var(--tg-theme-button-color, #3498db); color: var(--tg-theme-button-text-color, #fff); border-color: transparent; }
         .product-card { border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: var(--tg-theme-secondary-bg-color, #f9f9f9); display: flex; flex-direction: column; }
-        .product-img { width: 100%; max-height: 160px; padding: 10px 0; border-radius: 6px; margin-bottom: 10px; background: #ddd; text-align: center; color: #333; font-weight: bold; font-size: 14px; }
+        .product-img { width: 100%; max-height: 160px; padding: 10px 0; border-radius: 6px; margin-bottom: 10px; background: #ddd; text-align: center; color: #333; font-weight: bold; }
         .product-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
         .product-desc { font-size: 13px; color: #666; margin-bottom: 10px; line-height: 1.4; }
         .product-price { font-size: 16px; font-weight: bold; color: #2ecc71; margin-bottom: 10px; }
@@ -22,7 +22,6 @@
 </head>
 <body>
 
-    <!-- Меню категорій -->
     <div class="categories-menu">
         <button class="cat-btn active" onclick="filterCategory('all', this)">Всі товари</button>
         <button class="cat-btn" onclick="filterCategory('sets', this)">🔥 Готові сети</button>
@@ -35,49 +34,36 @@
         <button class="cat-btn" onclick="filterCategory('knives', this)">Ножі</button>
     </div>
 
-    <!-- Каталог товарів -->
-    <div id="catalog">Завантаження...</div>
+    <div id="catalog"></div>
 
-    <!-- Панель кошика -->
     <div id="cart-panel" class="cart-status" style="display: none;">
         <span id="cart-info">В кошику: 0 товарів</span>
         <button class="btn" style="margin-top: 10px; background: #2ecc71;" onclick="checkout()">Оформити замовлення</button>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg) { tg.ready(); tg.expand(); }
 
-        // Повний список товарів
         const products = [
             { id: 1, cat: 'sets', name: 'Тактичний Сет: Hatsan FlashPup + Насос + Приціл + 500 куль', price: 19400, desc: 'Повністю готовий до стрільби PCP-комплект. Економічна вигода при купівлі набором!', img: '📦 Комплект Hatsan' },
-            { id: 2, cat: 'sets', name: 'Стартовий Сет: Retay XPro + 50 холостих набоїв + Олія', price: 5950, desc: 'Комплект для захисту та тренувань. Пістолет, пачка патронів та засіб для чищення.', img: '📦 Комплект Retay' },
-            { id: 3, cat: 'rifles', name: 'Пневматична гвинтівка Kral Puncher Breaker Synthetic (4.5 мм)', price: 15960, desc: 'Потужна PCP гвинтівка (35 Дж) у компонуванні буллпап. Комплектується глушником.', img: '🎯 Kral Puncher' },
-            { id: 4, cat: 'rifles', name: 'Пневматична гвинтівка Stoeger RX5 Synthetic Combo', price: 8562, desc: 'Класична пружинно-поршнева модель («переломка»). Оптичний приціл 4х32 у комплекті.', img: '🎯 Stoeger RX5' },
-            { id: 5, cat: 'pistols', name: 'Пневматичний пістолет Crosman C11 (4.5мм)', price: 3200, desc: 'Газобалонний пістолет (CO2). Початкова швидкість кульки BB досягає 146 м/с.', img: '🔫 Crosman C11' },
-            { id: 6, cat: 'blank', name: 'Стартовий пістолет Retay XPro Black (9мм)', price: 5400, desc: 'Сигнально-шумовий напівавтоматичний пістолет під холостий патрон 9 мм.', img: '💥 Retay XPro' },
-            { id: 7, cat: 'flober', name: 'Револьвер Флобера ME 38 Pocket 4R', price: 9800, desc: 'Німецька збірка, калібр 4 мм. Сталевий нарізний ствол забезпечує точність.', img: '🇪🇺 ME 38 Pocket' },
-            { id: 8, cat: 'ammo', name: 'Кулі пневматичні JSB Exact Diablo 4.52 мм (0.547 г, 500 шт)', price: 480, desc: 'Чеські преміум-кулі для точної та спортивної стрільби з гвинтівок.', img: '🔋 JSB Exact' },
-            { id: 9, cat: 'ammo', name: 'Холості патроны Ozcursan 9 мм (50 шт)', price: 500, desc: 'Шумові пістолетні набої калібру 9 мм. Дуже гучний постріл.', img: '🔋 Ozcursan 9мм' },
-            { id: 10, cat: 'holsters', name: 'Поясна кобура шкіряна для PM / Retay XPro', price: 450, desc: 'Натуральна шкіра чорного кольору. Надійна фіксація на ремені.', img: '💼 Кобура ПМ' },
-            { id: 11, cat: 'holsters', name: 'Оперативна (наплічна) кобура універсальна', price: 680, desc: 'Регульовані лямки, можливість носіння на поясі або під пахвою.', img: '💼 Кобура Наплічна' },
-            { id: 12, cat: 'knives', name: 'Ніж нескладний Grand Way Танто 2307 B', price: 942, desc: 'Міцний тактичний ніж із фіксованим клинком типу tanto. Чохол у комплекті.', img: '🔪 Танто 2307' },
-            { id: 13, cat: 'knives', name: 'Ніж складаний Skif Plus Gidra', price: 850, desc: 'Компактний складаний ніж для повсякденного носіння (EDC).', img: '🔪 Skif Gidra' }
+            { id: 2, cat: 'sets', name: 'Стартовий Сет: Retay XPro + 50 холостих набоїв + Олія', price: 5950, desc: 'Комплект для захисту та тренувань.', img: '📦 Комплект Retay' },
+            { id: 3, cat: 'rifles', name: 'Пневматична гвинтівка Kral Puncher Breaker Synthetic (4.5 мм)', price: 15960, desc: 'Потужна PCP гвинтівка (35 Дж) у компонуванні буллпап.', img: '🎯 Kral Puncher' },
+            { id: 4, cat: 'rifles', name: 'Пневматична гвинтівка Stoeger RX5 Synthetic Combo', price: 8562, desc: 'Класична пружинно-поршнева модель («переломка»).', img: '🎯 Stoeger RX5' },
+            { id: 5, cat: 'pistols', name: 'Пневматичний пістолет Crosman C11 (4.5мм)', price: 3200, desc: 'Газобалонний пістолет (CO2).', img: '🔫 Crosman C11' },
+            { id: 6, cat: 'blank', name: 'Стартовий пістолет Retay XPro Black (9мм)', price: 5400, desc: 'Сигнально-шумовий напівавтоматичний пістолет.', img: '💥 Retay XPro' },
+            { id: 7, cat: 'flober', name: 'Револьвер Флобера ME 38 Pocket 4R', price: 9800, desc: 'Німецька збірка, калібр 4 мм.', img: '🇪🇺 ME 38 Pocket' },
+            { id: 8, cat: 'ammo', name: 'Кулі пневматичні JSB Exact Diablo 4.52 мм (0.547 г, 500 шт)', price: 480, desc: 'Чеські преміум-кулі для точної стрільби.', img: '🔋 JSB Exact' },
+            { id: 9, cat: 'ammo', name: 'Холості патроны Ozcursan 9 мм (50 шт)', price: 500, desc: 'Шумові пістолетні набої калібру 9 мм.', img: '🔋 Ozcursan 9мм' },
+            { id: 10, cat: 'holsters', name: 'Поясна кобура шкіряна для PM / Retay XPro', price: 450, desc: 'Натуральна шкіра чорного кольору.', img: '💼 Кобура ПМ' },
+            { id: 11, cat: 'knives', name: 'Ніж нескладний Grand Way Танто 2307 B', price: 942, desc: 'Міцний тактичний ніж із фіксованим клинком.', img: '🔪 Танто 2307' }
         ];
 
         let cart = [];
 
-        // Функція відображення товарів (БЕЗ ЗАПИТІВ ДО СЕРВЕРУ)
         function renderProducts(filteredList) {
             const catalog = document.getElementById('catalog');
             catalog.innerHTML = '';
-            
-            if(filteredList.length === 0) {
-                catalog.innerHTML = '<div>Товарів в цій категорії немає.</div>';
-                return;
-            }
-
             filteredList.forEach(p => {
                 catalog.innerHTML += `
                     <div class="product-card">
@@ -94,13 +80,8 @@
         function filterCategory(categoryName, buttonElement) {
             document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
             buttonElement.classList.add('active');
-
-            if (categoryName === 'all') {
-                renderProducts(products);
-            } else {
-                const filtered = products.filter(p => p.cat === categoryName);
-                renderProducts(filtered);
-            }
+            if (categoryName === 'all') { renderProducts(products); } 
+            else { renderProducts(products.filter(p => p.cat === categoryName)); }
         }
 
         function addToCart(name, price) {
@@ -115,23 +96,26 @@
             const info = document.getElementById('cart-info');
             if (cart.length > 0) {
                 panel.style.display = 'block';
-                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                info.innerText = `В кошику товарів: ${cart.length} | Сума: ${total} грн`;
+                info.innerText = `В кошику товарів: ${cart.length} | Сума: ${cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)} грн`;
             } else { panel.style.display = 'none'; }
         }
 
         function checkout() {
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
-    // Формируем красивый текст накладной для отправки в чат
-    let orderText = `📦 НОВЕ ЗАМОВЛЕННЯ\n`;
-    cart.forEach(item => {
-        orderText += `• ${item.name} x${item.quantity} (${item.price * item.quantity} грн)\n`;
-    });
-    orderText += `💰 РАЗОМ: ${total} грн`;
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            let orderText = `📦 НОВЕ ЗАМОВЛЕННЯ\n`;
+            cart.forEach(item => {
+                orderText += `• ${item.name} x${item.quantity} (${item.price * item.quantity} грн)\n`;
+            });
+            orderText += `💰 РАЗОМ: ${total} грн`;
 
-    // Отправляем текст напрямую в чат бота от лица пользователя
-    tg.sendData(orderText);
-    tg.close();
-}
+            if (tg) {
+                tg.sendData(orderText);
+                tg.close();
+            }
+        }
+
+        renderProducts(products);
+    </script>
+</body>
+</html>
 
