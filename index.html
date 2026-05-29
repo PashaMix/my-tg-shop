@@ -45,9 +45,11 @@
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg) {
+    tg.ready();
+    tg.expand();
+}
 
         // Повний список товарів
         const products = [
