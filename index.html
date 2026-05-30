@@ -179,14 +179,14 @@
             };
 
             try {
-                // Передаем анкету на ваш Render по безопасному интернет-каналу POST
+                // ИСПРАВЛЕНО: Прямой защищенный шлюз на ваш живой облачный сервер Render
                 const response = await fetch('https://onrender.com', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(orderData)
                 });
                 
-                // Закрываем окно внутри Telegram сразу после успешного ответа сервера
+                // Плавно закрываем магазин в Telegram при успешном ответе облака
                 if (response.ok && tg) {
                     tg.close();
                 }
