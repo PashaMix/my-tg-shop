@@ -107,9 +107,16 @@
         function renderProducts(filteredList) {
             const catalog = document.getElementById('catalog');
             catalog.innerHTML = '';
+            
+            if (filteredList.length === 0) {
+                catalog.innerHTML = '<div style="padding:20px; text-align:center;">Товарів в цій категорії немає.</div>';
+                return;
+            }
+
             filteredList.forEach(p => {
                 catalog.innerHTML += `
                     <div class="product-card">
+                        <div class="product-img">${p.img ? p.img : '📦 Товар'}</div>
                         <div class="product-title">${p.name}</div>
                         <div class="product-desc">${p.desc}</div>
                         <div class="product-price">${p.price} грн</div>
