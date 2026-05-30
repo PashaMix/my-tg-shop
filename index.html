@@ -12,54 +12,90 @@
         .cat-btn { background: var(--tg-theme-secondary-bg-color, #eee); color: var(--tg-theme-text-color, #000); border: 1px solid #ccc; padding: 8px 14px; border-radius: 20px; cursor: pointer; white-space: nowrap; font-size: 14px; }
         .cat-btn.active { background: var(--tg-theme-button-color, #3498db); color: var(--tg-theme-button-text-color, #fff); border-color: transparent; }
         .product-card { border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: var(--tg-theme-secondary-bg-color, #f9f9f9); display: flex; flex-direction: column; }
-        .product-img { width: 100%; max-height: 160px; padding: 10px 0; border-radius: 6px; margin-bottom: 10px; background: #ddd; text-align: center; color: #333; font-weight: bold; }
-        .product-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+        .product-img { width: 100%; max-height: 160px; padding: 10px 0; border-radius: 6px; margin-bottom: 10px; background: #ddd; text-align: center; color: #333; font-weight: bold; font-size: 24px; }
+        .product-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; color: var(--tg-theme-text-color, #000); }
         .product-desc { font-size: 13px; color: #666; margin-bottom: 10px; line-height: 1.4; }
         .product-price { font-size: 16px; font-weight: bold; color: #2ecc71; margin-bottom: 10px; }
-        .btn { background: var(--tg-theme-button-color, #3498db); color: var(--tg-theme-button-text-color, #fff); border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 15px; }
+        .cart-page { display: none; background: var(--tg-theme-bg-color, #fff); position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; padding: 15px; overflow-y: auto; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 14px; margin-bottom: 5px; font-weight: bold; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; background: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
+        .btn { background: var(--tg-theme-button-color, #3498db); color: var(--tg-theme-button-text-color, #fff); border: none; padding: 12px 15px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 15px; font-weight: bold; }
         .cart-status { position: fixed; bottom: 0; left: 0; right: 0; background: #333; color: #fff; padding: 15px; text-align: center; }
+        .back-btn { background: #e74c3c; margin-bottom: 15px; }
     </style>
 </head>
 <body>
-
-    <div class="categories-menu">
-        <button class="cat-btn active" onclick="filterCategory('all', this)">Всі товари</button>
-        <button class="cat-btn" onclick="filterCategory('sets', this)">🔥 Готові сети</button>
-        <button class="cat-btn" onclick="filterCategory('rifles', this)">Гвинтівки</button>
-        <button class="cat-btn" onclick="filterCategory('pistols', this)">Пневматичні пістолети</button>
-        <button class="cat-btn" onclick="filterCategory('blank', this)">Холості пістолети</button>
-        <button class="cat-btn" onclick="filterCategory('flober', this)">Револьвери Флобера</button>
-        <button class="cat-btn" onclick="filterCategory('ammo', this)">Набої та кулі</button>
-        <button class="cat-btn" onclick="filterCategory('holsters', this)">Кобури</button>
-        <button class="cat-btn" onclick="filterCategory('knives', this)">Ножі</button>
+    <div id="catalog-screen">
+        <div class="categories-menu">
+            <button class="cat-btn active" onclick="filterCategory('all', this)">Всі товари</button>
+            <button class="cat-btn" onclick="filterCategory('sets', this)">🔥 Готові сети</button>
+            <button class="cat-btn" onclick="filterCategory('rifles', this)">Гвинтівки</button>
+            <button class="cat-btn" onclick="filterCategory('pistols', this)">Пневматичні пістолети</button>
+            <button class="cat-btn" onclick="filterCategory('blank', this)">Холості пістолети</button>
+            <button class="cat-btn" onclick="filterCategory('flober', this)">Револьвери Флобера</button>
+            <button class="cat-btn" onclick="filterCategory('sprays', this)">💨 Перцеві балончики</button>
+            <button class="cat-btn" onclick="filterCategory('ammo', this)">Набої та кулі</button>
+            <button class="cat-btn" onclick="filterCategory('holsters', this)">Кобури</button>
+            <button class="cat-btn" onclick="filterCategory('knives', this)">Ножі</button>
+        </div>
+        <div id="catalog"></div>
+        <div id="cart-panel" class="cart-status" style="display: none;">
+            <span id="cart-info">В кошику: 0 товарів</span>
+            <button class="btn" style="margin-top: 10px; background: #2ecc71;" onclick="openCartPage()">Перейти до оформлення</button>
+        </div>
     </div>
-
-    <div id="catalog"></div>
-
-    <div id="cart-panel" class="cart-status" style="display: none;">
-        <span id="cart-info">В кошику: 0 товарів</span>
-        <button class="btn" style="margin-top: 10px; background: #2ecc71;" onclick="checkout()">Оформити замовлення</button>
+    <div id="cart-screen" class="cart-page">
+        <button class="btn back-btn" onclick="closeCartPage()">⬅️ Повернутися до каталогу</button>
+        <h3>🛒 Оформлення замовлення (Доставка Нова Пошта)</h3>
+        <div id="cart-items-list" style="margin-bottom: 20px; max-height: 150px; overflow-y: auto; background: var(--tg-theme-secondary-bg-color, #eee); padding: 10px; border-radius: 6px;"></div>
+        <form id="order-form" onsubmit="event.preventDefault(); submitOrder();">
+            <div class="form-group">
+                <label>Прізвище отримувача:</label>
+                <input type="text" id="user_last_name" placeholder="Наприклад: Іванов" required>
+            </div>
+            <div class="form-group">
+                <label>Ім'я отримувача:</label>
+                <input type="text" id="user_first_name" placeholder="Наприклад: Петро" required>
+            </div>
+            <div class="form-group">
+                <label>По батькові отримувача:</label>
+                <input type="text" id="user_middle_name" placeholder="Наприклад: Миколайович" required>
+            </div>
+            <div class="form-group">
+                <label>Номер телефону:</label>
+                <input type="tel" id="user_phone" placeholder="+380XXXXXXXXX" value="+380" required>
+            </div>
+            <div class="form-group">
+                <label>Місто доставки Новою Поштою:</label>
+                <input type="text" id="user_city" placeholder="Наприклад: Київ" required>
+            </div>
+            <div class="form-group">
+                <label>Номер відділення або Поштомату у цьому місті:</label>
+                <input type="text" id="user_post" placeholder="Наприклад: Відділення №12" required>
+            </div>
+            <button type="submit" class="btn" style="background: #2ecc71; margin-top: 15px; font-size: 16px;">🔥 Підтвердити та замовити</button>
+        </form>
     </div>
-
-    <script>
+        <script>
         const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tg) { tg.ready(); tg.expand(); }
 
         const products = [
-            { id: 1, cat: 'sets', name: 'Тактичний Сет: Hatsan FlashPup + Насос + Приціл + 500 куль', price: 19400, desc: 'Повністю готовий до стрільби PCP-комплект. Економічна вигода при купівлі набором!', img: '📦 Комплект Hatsan' },
-            { id: 2, cat: 'sets', name: 'Стартовий Сет: Retay XPro + 50 холостих набоїв + Олія', price: 5950, desc: 'Комплект для захисту та тренувань.', img: '📦 Комплект Retay' },
-            { id: 3, cat: 'rifles', name: 'Пневматична гвинтівка Kral Puncher Breaker Synthetic (4.5 мм)', price: 15960, desc: 'Потужна PCP гвинтівка (35 Дж) у компонуванні буллпап.', img: '🎯 Kral Puncher' },
-            { id: 4, cat: 'rifles', name: 'Пневматична гвинтівка Stoeger RX5 Synthetic Combo', price: 8562, desc: 'Класична пружинно-поршнева модель («переломка»).', img: '🎯 Stoeger RX5' },
-            { id: 5, cat: 'pistols', name: 'Пневматичний пістолет Crosman C11 (4.5мм)', price: 3200, desc: 'Газобалонний пістолет (CO2).', img: '🔫 Crosman C11' },
-            { id: 6, cat: 'blank', name: 'Стартовий пістолет Retay XPro Black (9мм)', price: 5400, desc: 'Сигнально-шумовий напівавтоматичний пістолет.', img: '💥 Retay XPro' },
-            { id: 7, cat: 'flober', name: 'Револьвер Флобера ME 38 Pocket 4R', price: 9800, desc: 'Німецька збірка, калібр 4 мм.', img: '🇪🇺 ME 38 Pocket' },
-            { id: 8, cat: 'ammo', name: 'Кулі пневматичні JSB Exact Diablo 4.52 мм (0.547 г, 500 шт)', price: 480, desc: 'Чеські преміум-кулі для точної стрільби.', img: '🔋 JSB Exact' },
-            { id: 9, cat: 'ammo', name: 'Холості патроны Ozcursan 9 мм (50 шт)', price: 500, desc: 'Шумові пістолетні набої калібру 9 мм.', img: '🔋 Ozcursan 9мм' },
-            { id: 10, cat: 'holsters', name: 'Поясна кобура шкіряна для PM / Retay XPro', price: 450, desc: 'Натуральна шкіра чорного кольору.', img: '💼 Кобура ПМ' },
-            { id: 11, cat: 'knives', name: 'Ніж нескладний Grand Way Танто 2307 B', price: 942, desc: 'Міцний тактичний ніж із фіксованим клинком.', img: '🔪 Танто 2307' }
+            { id: 1, cat: 'sets', name: 'Тактичний Сет: Hatsan FlashPup + Насос + Приціл + 500 куль', price: 19400, desc: 'Повністю готовий до стрільби PCP-комплект. Економічна вигода при купівлі набором.', img: '📦' },
+            { id: 2, cat: 'sets', name: 'Стартовий Сет: Retay XPro + 50 холостих набоїв', price: 5950, desc: 'Комплект для захисту та тренувань.', img: '📦' },
+            { id: 3, cat: 'rifles', name: 'Пневматична гвинтівка Kral Puncher Breaker (4.5 мм)', price: 15960, desc: 'Потужна PCP гвинтівка (35 Дж) у компонуванні буллпап.', img: '🎯' },
+            { id: 4, cat: 'rifles', name: 'Пневматична гвинтівка Stoeger RX5 Synthetic Combo', price: 8562, desc: 'Класична пружинно-поршнева модель («переломка»).', img: '🎯' },
+            { id: 5, cat: 'pistols', name: 'Пневматичний пістолет Crosman C11 (4.5мм)', price: 3200, desc: 'Газобалонний пістолет (CO2). Початкова швидкість 146 м/с.', img: '🔫' },
+            { id: 6, cat: 'blank', name: 'Стартовий пістолет Retay XPro Black (9мм)', price: 5400, desc: 'Сигнально-шумовий напівавтоматичний пістолет.', img: '💥' },
+            { id: 7, cat: 'flober', name: 'Револьвер Флобера ME 38 Pocket 4R', price: 9800, desc: 'Німецька збірка, калібр 4 мм. Сталевий нарізний ствол.', img: '🇪🇺' },
+            { id: 8, cat: 'sprays', name: 'Газовий балончик Терен-4М (Посилений)', price: 420, desc: 'Ефективний засіб самозахисту. Сльозоточивий посилений ефект.', img: '💨' },
+            { id: 9, cat: 'sprays', name: 'Газовий балончик Перець-4 (Струменевий)', price: 380, desc: 'Струменевий балончик з витяжкою натурального капсаїцину.', img: '💨' },
+            { id: 10, cat: 'ammo', name: 'Кулі пневматичні JSB Exact Diablo 4.52 мм (500 шт)', price: 480, desc: 'Чеські преміум-кулі для точної стрільби.', img: '🔋' },
+            { id: 11, cat: 'holsters', name: 'Поясна кобура шкіряна для PM / Retay', price: 450, desc: 'Натуральна шкіра чорного кольору.', img: '💼' },
+            { id: 12, cat: 'knives', name: 'Ніж нескладний Grand Way Танто 2307 B', price: 942, desc: 'Міцний тактичний ніж із фіксованим клинком.', img: '🔪' }
         ];
-
-        let cart = [];
+                    let cart = [];
 
         function renderProducts(filteredList) {
             const catalog = document.getElementById('catalog');
@@ -67,9 +103,9 @@
             filteredList.forEach(p => {
                 catalog.innerHTML += `
                     <div class="product-card">
-                        <div class="product-img">${p.img}</div>
+                        <div class="product-img">${p.img ? p.img : '📦'}</div>
                         <div class="product-title">${p.name}</div>
-                        <div class="product-desc">${p.desc}</div>
+                        <div class="product-desc">${p.desc ? p.desc : 'Опис очікується...'}</div>
                         <div class="product-price">${p.price} грн</div>
                         <button class="btn" onclick="addToCart('${p.name}', ${p.price})">Додати в кошик</button>
                     </div>
@@ -86,8 +122,7 @@
 
         function addToCart(name, price) {
             const item = cart.find(i => i.name === name);
-            if (item) { item.quantity += 1; } 
-            else { cart.push({ name: name, price: price, quantity: 1 }); }
+            if (item) { item.quantity += 1; } else { cart.push({ name: name, price: price, quantity: 1 }); }
             updateCartPanel();
         }
 
@@ -96,20 +131,43 @@
             const info = document.getElementById('cart-info');
             if (cart.length > 0) {
                 panel.style.display = 'block';
-                info.innerText = `В кошику товарів: ${cart.length} | Сума: ${cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)} грн`;
+                const total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+                info.innerText = `В кошику товарів: ${cart.length} | Сума: ${total} грн`;
             } else { panel.style.display = 'none'; }
         }
 
-        function checkout() {
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            let orderText = `📦 НОВЕ ЗАМОВЛЕННЯ\n`;
+        function openCartPage() {
+            document.getElementById('catalog-screen').style.display = 'none';
+            const cartScreen = document.getElementById('cart-screen');
+            cartScreen.style.display = 'block';
+            
+            const listContainer = document.getElementById('cart-items-list');
+            listContainer.innerHTML = '';
             cart.forEach(item => {
-                orderText += `• ${item.name} x${item.quantity} (${item.price * item.quantity} грн)\n`;
+                listContainer.innerHTML += `<div style="padding:5px 0; border-bottom:1px dashed #ccc; color:#000;">• <b>${item.name}</b> x${item.quantity} — ${item.price * item.quantity} грн</div>`;
             });
-            orderText += `💰 РАЗОМ: ${total} грн`;
+            listContainer.innerHTML += `<div style="margin-top:10px; font-size:15px; font-weight:bold; color:#2ecc71;">Всього до сплати: ${cart.reduce((sum, i) => sum + (i.price * i.quantity), 0)} грн</div>`;
+        }
 
+        function closeCartPage() {
+            document.getElementById('cart-screen').style.display = 'none';
+            document.getElementById('catalog-screen').style.display = 'block';
+        }
+
+        function submitOrder() {
+            const total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+            const orderData = {
+                lastName: document.getElementById('user_last_name').value,
+                firstName: document.getElementById('user_first_name').value,
+                middleName: document.getElementById('user_middle_name').value,
+                phone: document.getElementById('user_phone').value,
+                city: document.getElementById('user_city').value,
+                post: document.getElementById('user_post').value,
+                total: total,
+                cart: cart
+            };
             if (tg) {
-                tg.sendData(orderText);
+                tg.sendData(JSON.stringify(orderData));
                 tg.close();
             }
         }
