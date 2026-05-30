@@ -29,12 +29,12 @@
     <div id="catalog-screen">
         <div class="categories-menu">
             <button class="cat-btn active" onclick="filterCategory('all', this)">Всі товари</button>
-            <button class="cat-btn" onclick="filterCategory('sets', this)">Готові сети</button>
+            <button class="cat-btn" onclick="filterCategory('sets', this)">🔥 Готові сети</button>
             <button class="cat-btn" onclick="filterCategory('rifles', this)">Гвинтівки</button>
             <button class="cat-btn" onclick="filterCategory('pistols', this)">Пневматичні пістолети</button>
             <button class="cat-btn" onclick="filterCategory('blank', this)">Холості пістолети</button>
             <button class="cat-btn" onclick="filterCategory('flober', this)">Револьвери Флобера</button>
-            <button class="cat-btn" onclick="filterCategory('sprays', this)">Перцеві балончики</button>
+            <button class="cat-btn" onclick="filterCategory('sprays', this)">💨 Перцеві балончики</button>
             <button class="cat-btn" onclick="filterCategory('ammo', this)">Набої та кулі</button>
             <button class="cat-btn" onclick="filterCategory('holsters', this)">Кобури</button>
             <button class="cat-btn" onclick="filterCategory('knives', this)">Ножі</button>
@@ -59,8 +59,9 @@
                 <input type="text" id="user_first_name" placeholder="Наприклад: Петро" required>
             </div>
             <div class="form-group">
-                <label>По батькові отримувача:</label>
-                <input type="text" id="user_middle_name" placeholder="Наприклад: Миколайович" required>
+                <label>По батькові отримувача (необов'язково):</label>
+                <!-- ИСПРАВЛЕНО: Убран атрибут required -->
+                <input type="text" id="user_middle_name" placeholder="Наприклад: Миколайович">
             </div>
             <div class="form-group">
                 <label>Номер телефону:</label>
@@ -82,16 +83,16 @@
         if (tg) { tg.ready(); tg.expand(); }
 
         const products = [
-            { id: 1, cat: 'sets', name: 'Тактичний Сет: Hatsan FlashPup + Насос + Приціл + 500 куль', price: 19400, desc: 'Повністю готовий до стрільби PCP-комплект. Економічна вигода при купівлі набором.', img: '📦' },
-            { id: 2, cat: 'sets', name: 'Стартовий Сет: Retay XPro + 50 холостих набоїв', price: 5950, desc: 'Комплект для захисту та тренувань.', img: '📦' },
+            { id: 1, cat: 'sets', name: 'Тактичний Сет: Hatsan FlashPup + Насос + Приціл + 500 кулі', price: 19400, desc: 'Повністю готовий до стрільби PCP-комплект. Економічна вигода при купівлі набором.', img: '📦' },
+            { id: 2, cat: 'sets', name: 'Стартовий Сет: Retay XPro + 50 холостих набоїв', price: 5950, desc: 'Комплект для захисту та тренувань.' },
             { id: 3, cat: 'rifles', name: 'Пневматична гвинтівка Kral Puncher Breaker (4.5 мм)', price: 15960, desc: 'Потужна PCP гвинтівка (35 Дж) у компонуванні буллпап.', img: '🎯' },
             { id: 4, cat: 'rifles', name: 'Пневматична гвинтівка Stoeger RX5 Synthetic Combo', price: 8562, desc: 'Класична пружинно-поршнева модель («переломка»).', img: '🎯' },
             { id: 5, cat: 'pistols', name: 'Пневматичний пістолет Crosman C11 (4.5мм)', price: 3200, desc: 'Газобалонний пістолет (CO2). Початкова швидкість 146 м/с.', img: '🔫' },
             { id: 6, cat: 'blank', name: 'Стартовий пістолет Retay XPro Black (9мм)', price: 5400, desc: 'Сигнально-шумовий напівавтоматичний пістолет.', img: '💥' },
             { id: 7, cat: 'flober', name: 'Револьвер Флобера ME 38 Pocket 4R', price: 9800, desc: 'Німецька збірка, калібр 4 мм. Сталевий нарізний ствол.', img: '🇪🇺' },
-            { id: 8, cat: 'sprays', name: 'Газовий балончик Терен-4М (Посилений)', price: 420, desc: 'Ефективний засіб самозахисту. Сльозоточивий посилений ефект.', img: '💨' },
+            { id: 8, cat: 'sprays', name: 'Газовий балончик Терен-4М (Посилений)', price: 420, desc: 'Ефективний засіб самозахисту для правоохоронних органів.', img: '💨' },
             { id: 9, cat: 'sprays', name: 'Газовий балончик Перець-4 (Струменевий)', price: 380, desc: 'Струменевий балончик з витяжкою натурального капсаїцину.', img: '💨' },
-            { id: 10, cat: 'ammo', name: 'Кулі пневматичні JSB Exact Diablo 4.52 мм (500 шт)', price: 480, desc: 'Чеські преміум-кулі для точної стрільби.', img: '🔋' },
+            { id: 10, cat: 'ammo', name: 'Кулі pneumatic JSB Exact Diablo 4.52 мм (500 шт)', price: 480, desc: 'Чеські преміум-кулі для точної стрільби.', img: '🔋' },
             { id: 11, cat: 'holsters', name: 'Поясна кобура шкіряна для PM / Retay', price: 450, desc: 'Натуральна шкіра чорного кольору.', img: '💼' },
             { id: 12, cat: 'knives', name: 'Ніж нескладний Grand Way Танто 2307 B', price: 942, desc: 'Міцний тактичний ніж із фіксованим клинком.', img: '🔪' }
         ];
@@ -156,16 +157,30 @@
 
         function submitOrder() {
             const total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+            
+            const lastName = document.getElementById('user_last_name').value;
+            const firstName = document.getElementById('user_first_name').value;
+            let middleName = document.getElementById('user_middle_name').value;
+            
+            // Если отчество пустое, оставляем пустую строчку
+            if (!middleName) { middleName = ""; }
+
+            const phone = document.getElementById('user_phone').value;
+            const city = document.getElementById('user_city').value;
+            const post = document.getElementById('user_post').value;
+
+            // Формируем JSON-пакет данных анкеты для передачи в Python
             const orderData = {
-                lastName: document.getElementById('user_last_name').value,
-                firstName: document.getElementById('user_first_name').value,
-                middleName: document.getElementById('user_middle_name').value,
-                phone: document.getElementById('user_phone').value,
-                city: document.getElementById('user_city').value,
-                post: document.getElementById('user_post').value,
+                lastName: lastName,
+                firstName: firstName,
+                middleName: middleName,
+                phone: phone,
+                city: city,
+                post: post,
                 total: total,
                 cart: cart
             };
+
             if (tg) {
                 tg.sendData(JSON.stringify(orderData));
                 tg.close();
