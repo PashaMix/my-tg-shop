@@ -82,14 +82,14 @@
         if (tg) { tg.ready(); tg.expand(); }
 
         const products = [
-            { id: 1, cat: 'sets', name: 'Тактичний Сет: Hatsan FlashPup + Насос + Приціл + 500 куль', price: 19400, desc: 'Повністю готовий до стрільби PCP-комплект. Економічна вигода при купівлі набором.', img: '📦' },
+            { id: 1, cat: 'sets', name: 'Тактичний Сет: Hatsan FlashPup + Насос + Приціл + 500 кулі', price: 19400, desc: 'Повністю готовий до стрільби PCP-комплект. Економічна вигода при купівлі набором.', img: '📦' },
             { id: 2, cat: 'sets', name: 'Стартовий Сет: Retay XPro + 50 холостих набоїв', price: 5950, desc: 'Комплект для захисту та тренувань.' },
             { id: 3, cat: 'rifles', name: 'Пневматична гвинтівка Kral Puncher Breaker (4.5 мм)', price: 15960, desc: 'Потужна PCP гвинтівка (35 Дж) у компонуванні буллпап.', img: '🎯' },
             { id: 4, cat: 'rifles', name: 'Пневматична гвинтівка Stoeger RX5 Synthetic Combo', price: 8562, desc: 'Класична пружинно-поршнева модель («переломка»).', img: '🎯' },
-            { id: 5, cat: 'pistols', name: 'Пневматичний пістолет Crosman C11 (4.5мм)', price: 3200, desc: 'Газобалонний пістолет (CO2). Початкова скорость 146 м/с.', img: '🔫' },
+            { id: 5, cat: 'pistols', name: 'Пневматичний пістолет Crosman C11 (4.5мм)', price: 3200, desc: 'Газобалонний пістолет (CO2). Початкова швидкість 146 м/с.', img: '🔫' },
             { id: 6, cat: 'blank', name: 'Стартовий пістолет Retay XPro Black (9мм)', price: 5400, desc: 'Сигнально-шумовий напівавтоматичний пістолет.', img: '💥' },
             { id: 7, cat: 'flober', name: 'Револьвер Флобера ME 38 Pocket 4R', price: 9800, desc: 'Німецька збірка, калібр 4 мм. Сталевий нарізний ствол.', img: '🇪🇺' },
-            { id: 8, cat: 'sprays', name: 'Газовий балончик Терен-4М (Посилений)', price: 420, desc: 'Ефективний засіб самозахисту. Сльозоточивий посилений ефект.', img: '💨' },
+            { id: 8, cat: 'sprays', name: 'Газовий балончик Терен-4М (Посилений)', price: 420, desc: 'Ефективний засіб самозахисту для правоохоронних органів.', img: '💨' },
             { id: 9, cat: 'sprays', name: 'Газовий балончик Перець-4 (Струменевий)', price: 380, desc: 'Струменевий балончик з витяжкою натурального капсаїцину.', img: '💨' },
             { id: 10, cat: 'ammo', name: 'Кулі пневматичні JSB Exact Diablo 4.52 мм (500 шт)', price: 480, desc: 'Чеські преміум-кулі для точної стрільби.', img: '🔋' },
             { id: 11, cat: 'holsters', name: 'Поясна кобура шкіряна для PM / Retay', price: 450, desc: 'Натуральна шкіра чорного кольору.', img: '💼' },
@@ -154,36 +154,44 @@
             document.getElementById('catalog-screen').style.display = 'block';
         }
 
-        function submitOrder() {
+        // ОТПРАВКА ДАННЫХ НАПРЯМУЮ НА ВАШ ОБЛАЧНЫЙ СЕРВЕР RENDER ЧЕРЕЗ ИНТЕРНЕТ
+        async function submitOrder() {
             const total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
             
             const lastName = document.getElementById('user_last_name').value;
             const firstName = document.getElementById('user_first_name').value;
             let middleName = document.getElementById('user_middle_name').value;
-            
-            // Если отчество пустое, пишем прочерк, чтобы текст не ломался
             if (!middleName) { middleName = "-"; }
 
             const phone = document.getElementById('user_phone').value;
             const city = document.getElementById('user_city').value;
             const post = document.getElementById('user_post').value;
 
-            // Формируем красивый текстовый чек
-            let orderText = `📦 НОВЕ ЗАМОВЛЕННЯ — НОВА ПОШТА\n`;
-            orderText += `📋 ПІБ: ${lastName} ${firstName} ${middleName}\n`;
-            orderText += `📞 Тел: ${phone}\n`;
-            orderText += `🏙️ Місто: м. ${city}\n`;
-            orderText += `📦 Адреса: ${post}\n`;
-            orderText += `━━━━━━━\n🛒 Товари:\n`;
-            cart.forEach(item => {
-                orderText += `• ${item.name} x${item.quantity} (${item.price * item.quantity} грн)\n`;
-            });
-            orderText += `━━━━━━━\n💰 РАЗОМ: ${total} грн`;
+            const orderData = {
+                lastName: lastName,
+                firstName: firstName,
+                middleName: middleName,
+                phone: phone,
+                city: city,
+                post: post,
+                total: total,
+                cart: cart
+            };
 
-            if (tg) {
-                // Универсальный метод перенаправления текста: работает ВЕЗДЕ
-                tg.openTelegramLink('https://t.me' + encodeURIComponent(orderText));
-                tg.close();
+            try {
+                // Передаем анкету на ваш Render по безопасному интернет-каналу POST
+                const response = await fetch('https://onrender.com', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+                
+                // Закрываем окно внутри Telegram сразу после успешного ответа сервера
+                if (response.ok && tg) {
+                    tg.close();
+                }
+            } catch (error) {
+                alert('Помилка відправки замовлення до хмари.');
             }
         }
 
